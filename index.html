@@ -3,92 +3,1262 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>捡手机·交互版</title>
+<title>遗失的手机</title>
+
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #2c2c2e; display: flex; justify-content: center; align-items: center; height: 100vh; font-family: -apple-system, sans-serif; overflow: hidden; }
-  .iphone { width: 100%; max-width: 390px; height: 100vh; max-height: 844px; background: #fff; border-radius: 45px; position: relative; overflow: hidden; border: 6px solid #1a1a1a; display: flex; flex-direction: column; }
-  .screen { position: absolute; inset: 0; display: none; flex-direction: column; }
-  .screen.active { display: flex; }
-  
-  /* 锁屏界面 */
-  #lock-screen { background: linear-gradient(135deg, #1a1a2e, #16213e); color: #fff; justify-content: center; align-items: center; }
-  #lock-screen .time { font-size: 80px; font-weight: 200; }
-  #lock-screen .date { font-size: 18px; margin-bottom: 50px; opacity: 0.8; }
-  #lock-screen .unlock-btn { padding: 12px 40px; background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); border-radius: 30px; color: #fff; font-size: 16px; cursor: pointer; backdrop-filter: blur(10px); }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
 
-  /* 主屏幕 */
-  #home-screen { background: url('https://picsum.photos/400/800') center/cover; padding-top: 60px; }
-  .app-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; padding: 20px; }
-  .app { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
-  .app-icon { width: 60px; height: 60px; border-radius: 14px; display: flex; justify-content: center; align-items: center; font-size: 30px; background: rgba(255,255,255,0.8); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-  .app-name { font-size: 11px; color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.8); }
+body {
+    background: #171717;
+    font-family: -apple-system, BlinkMacSystemFont,
+    "Helvetica Neue", sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+    color: white;
+}
 
-  /* 聊天界面 */
-  #chat-screen { background: #fff; }
-  .chat-header { background: #f9f9f9; padding: 50px 15px 10px; text-align: center; border-bottom: 1px solid #e5e5ea; font-weight: 600; }
-  .chat-body { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-  .msg { max-width: 70%; padding: 10px 14px; border-radius: 18px; font-size: 15px; }
-  .msg.received { background: #e5e5ea; align-self: flex-start; border-bottom-left-radius: 4px; }
-  .msg.sent { background: #007aff; color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
-  .back-btn { position: absolute; top: 55px; left: 15px; color: #007aff; font-size: 16px; cursor: pointer; }
+/* 手机外壳 */
+
+.phone {
+    width: 100%;
+    max-width: 430px;
+    height: 100dvh;
+    max-height: 900px;
+    background: #000;
+    position: relative;
+    overflow: hidden;
+    border-radius: 0;
+}
+
+@media(min-width:500px) {
+    .phone {
+        height: 850px;
+        border-radius: 42px;
+        border: 7px solid #333;
+    }
+}
+
+/* 顶部状态栏 */
+
+.status-bar {
+    height: 48px;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 27px;
+    font-size: 13px;
+    font-weight: 600;
+    pointer-events: none;
+}
+
+.status-right {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.dynamic-island {
+    position: absolute;
+    width: 110px;
+    height: 32px;
+    background: black;
+    border-radius: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 9px;
+    z-index: 110;
+    border: 1px solid #161616;
+}
+
+/* 底部横条 */
+
+.home-indicator {
+    position: absolute;
+    width: 135px;
+    height: 5px;
+    border-radius: 10px;
+    background: white;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 200;
+}
+
+/* 锁屏 */
+
+.lock-screen {
+    position: absolute;
+    inset: 0;
+    background:
+    linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.65)),
+    radial-gradient(ellipse at 50% 35%, #536577, #192532 55%, #07090d);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: opacity .6s, transform .6s;
+}
+
+.lock-date {
+    margin-top: 105px;
+    font-size: 17px;
+    color: #eee;
+}
+
+.lock-time {
+    font-size: 76px;
+    font-weight: 200;
+    letter-spacing: -4px;
+    margin-top: 5px;
+}
+
+.lock-message {
+    margin-top: 75px;
+    text-align: center;
+    font-size: 14px;
+    line-height: 2;
+    color: #eee;
+}
+
+.pass-title {
+    margin-top: 45px;
+    font-size: 14px;
+    color: #ddd;
+}
+
+.password-dots {
+    display: flex;
+    gap: 18px;
+    margin-top: 22px;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid white;
+}
+
+.dot.active {
+    background: white;
+}
+
+.keypad {
+    margin-top: 30px;
+    display: grid;
+    grid-template-columns: repeat(3, 70px);
+    gap: 13px 20px;
+}
+
+.key {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.16);
+    border: 1px solid rgba(255,255,255,.2);
+    color: white;
+    font-size: 27px;
+    font-weight: 300;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: background .15s, transform .15s;
+}
+
+.key:active {
+    background: rgba(255,255,255,.45);
+    transform: scale(.93);
+}
+
+.key.empty {
+    visibility: hidden;
+}
+
+.key.delete {
+    background: transparent;
+    border: none;
+    font-size: 14px;
+}
+
+.error-text {
+    height: 20px;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #ff7777;
+}
+
+/* 抖动 */
+
+.shake {
+    animation: shake .4s;
+}
+
+@keyframes shake {
+    0%,100% {transform: translateX(0)}
+    20%,60% {transform: translateX(-9px)}
+    40%,80% {transform: translateX(9px)}
+}
+
+/* 桌面 */
+
+.home-screen {
+    position: absolute;
+    inset: 0;
+    background:
+    linear-gradient(150deg, rgba(10,20,40,.15), rgba(0,0,0,.3)),
+    radial-gradient(circle at 30% 30%, #657c94, #243649 55%, #10151e);
+    padding: 70px 22px 100px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .5s;
+}
+
+.home-screen.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.desktop-date {
+    font-size: 14px;
+    color: rgba(255,255,255,.8);
+    margin-bottom: 8px;
+}
+
+.desktop-clock {
+    font-size: 32px;
+    font-weight: 300;
+    margin-bottom: 35px;
+}
+
+.app-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 30px 12px;
+}
+
+.app {
+    text-align: center;
+    cursor: pointer;
+}
+
+.app-icon {
+    width: 58px;
+    height: 58px;
+    margin: auto;
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,.2);
+    transition: transform .15s;
+}
+
+.app:active .app-icon {
+    transform: scale(.88);
+}
+
+.app-name {
+    font-size: 11px;
+    margin-top: 7px;
+    color: white;
+    text-shadow: 0 1px 3px #333;
+}
+
+.messages-icon {background: #28c45c}
+.photos-icon {background: #fff}
+.notes-icon {background: #fff}
+.settings-icon {background: #aaa}
+.camera-icon {background: #555}
+.music-icon {background: #fa3557}
+.weather-icon {background: #52a8e8}
+.clock-icon {background: #333}
+
+.dock {
+    position: absolute;
+    bottom: 30px;
+    left: 15px;
+    right: 15px;
+    height: 90px;
+    background: rgba(255,255,255,.2);
+    border-radius: 27px;
+    backdrop-filter: blur(20px);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+/* App 窗口 */
+
+.app-window {
+    position: absolute;
+    inset: 0;
+    background: #f7f7f7;
+    color: #111;
+    z-index: 50;
+    visibility: hidden;
+    opacity: 0;
+    transform: scale(.92);
+    transition: .3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.app-window.open {
+    visibility: visible;
+    opacity: 1;
+    transform: scale(1);
+}
+
+.app-header {
+    height: 100px;
+    flex-shrink: 0;
+    padding: 53px 20px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(250,250,250,.96);
+    border-bottom: 1px solid #ddd;
+}
+
+.back-btn {
+    color: #1685ff;
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.app-title {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.app-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    padding-bottom: 35px;
+}
+
+/* 信息 */
+
+.messages-app {
+    background: #fff;
+}
+
+.chat-person {
+    text-align: center;
+    margin: 10px 0 25px;
+    font-size: 13px;
+    color: #777;
+}
+
+.avatar {
+    width: 55px;
+    height: 55px;
+    background: #aaa;
+    border-radius: 50%;
+    margin: 0 auto 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 27px;
+}
+
+.chat-time {
+    text-align: center;
+    font-size: 11px;
+    color: #999;
+    margin: 20px 0;
+}
+
+.bubble-row {
+    display: flex;
+    margin-bottom: 12px;
+}
+
+.bubble-row.right {
+    justify-content: flex-end;
+}
+
+.bubble {
+    max-width: 77%;
+    padding: 11px 15px;
+    border-radius: 19px;
+    font-size: 14px;
+    line-height: 1.6;
+    position: relative;
+    word-break: break-word;
+}
+
+.left .bubble {
+    background: #e9e9eb;
+    color: #111;
+    border-bottom-left-radius: 5px;
+}
+
+.right .bubble {
+    background: #1685ff;
+    color: white;
+    border-bottom-right-radius: 5px;
+}
+
+.chat-input-area {
+    display: flex;
+    gap: 8px;
+    padding: 12px;
+    border-top: 1px solid #ddd;
+    background: #fff;
+}
+
+.chat-input {
+    flex: 1;
+    height: 38px;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    padding: 0 14px;
+    outline: none;
+    font-size: 14px;
+    min-width: 0;
+}
+
+.send-btn {
+    border: none;
+    background: #1685ff;
+    color: white;
+    padding: 0 15px;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+/* 相册 */
+
+.photos-app {
+    background: #fff;
+}
+
+.photos-content {
+    padding: 20px;
+}
+
+.photos-heading {
+    font-size: 25px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+}
+
+.photo {
+    aspect-ratio: 1;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    background: #bbb;
+}
+
+.photo-art {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 35px;
+}
+
+.p1 {background: linear-gradient(140deg,#f8c6a2,#8d626b)}
+.p2 {background: linear-gradient(140deg,#344e69,#b4c4d4)}
+.p3 {background: linear-gradient(140deg,#f6d99c,#d08a52)}
+.p4 {background: linear-gradient(140deg,#7a9a8c,#253c3a)}
+.p5 {background: linear-gradient(140deg,#c8b3dc,#6b6689)}
+.p6 {background: linear-gradient(140deg,#e9c9c1,#875c6a)}
+
+.photo-viewer {
+    position: absolute;
+    inset: 0;
+    background: #050505;
+    z-index: 80;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+}
+
+.photo-viewer.show {
+    display: flex;
+}
+
+.large-photo {
+    width: 90%;
+    aspect-ratio: 4/5;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 100px;
+}
+
+.photo-clue {
+    font-size: 13px;
+    color: #ddd;
+    margin-top: 20px;
+    padding: 0 20px;
+    text-align: center;
+}
+
+.close-photo {
+    position: absolute;
+    top: 55px;
+    left: 20px;
+    color: white;
+    border: none;
+    background: none;
+    font-size: 20px;
+}
+
+/* 备忘录 */
+
+.notes-app {
+    background: #fff;
+}
+
+.notes-date {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 20px;
+}
+
+.note-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 25px;
+}
+
+.note-text {
+    font-size: 16px;
+    line-height: 2;
+    color: #333;
+    white-space: pre-wrap;
+}
+
+/* 通知 */
+
+.toast {
+    position: absolute;
+    top: 55px;
+    left: 20px;
+    right: 20px;
+    background: rgba(255,255,255,.95);
+    color: #111;
+    padding: 15px;
+    border-radius: 15px;
+    z-index: 150;
+    display: none;
+    box-shadow: 0 5px 20px rgba(0,0,0,.2);
+    font-size: 13px;
+}
+
+.toast.show {
+    display: block;
+    animation: toastIn .3s;
+}
+
+@keyframes toastIn {
+    from {transform: translateY(-20px);opacity:0}
+    to {transform: translateY(0);opacity:1}
+}
 </style>
 </head>
+
 <body>
 
-<div class="iphone">
-  <!-- 锁屏界面 -->
-  <div id="lock-screen" class="screen active">
-    <div class="time">9:41</div>
-    <div class="date">11月1日 星期六</div>
-    <div class="unlock-btn" onclick="unlock()">上滑解锁</div>
-  </div>
+<div class="phone" id="phone">
 
-  <!-- 主屏幕 -->
-  <div id="home-screen" class="screen">
-    <div class="app-grid">
-      <div class="app" onclick="openApp('chat')">
-        <div class="app-icon">💬</div>
-        <div class="app-name">信息</div>
-      </div>
-      <div class="app" onclick="alert('相册功能开发中～')">
-        <div class="app-icon">🖼️</div>
-        <div class="app-name">相册</div>
-      </div>
-      <div class="app" onclick="alert('时钟功能开发中～')">
-        <div class="app-icon">🕐</div>
-        <div class="app-name">时钟</div>
-      </div>
+    <div class="status-bar">
+        <span id="statusTime">9:41</span>
+        <div class="dynamic-island"></div>
+        <div class="status-right">
+            <span>●●●</span>
+            <span>WiFi</span>
+            <span>▰</span>
+        </div>
     </div>
-  </div>
 
-  <!-- 聊天界面 -->
-  <div id="chat-screen" class="screen">
-    <div class="chat-header">未知联系人</div>
-    <div class="back-btn" onclick="goHome()">〈 返回</div>
-    <div class="chat-body">
-      <div class="msg received">你捡到我的手机了？</div>
-      <div class="msg sent">对，你手机还要不要了？</div>
-      <div class="msg received">要！你在哪，我来找你！</div>
+    <div class="home-indicator"></div>
+
+    <!-- 锁屏 -->
+
+    <div class="lock-screen" id="lockScreen">
+
+        <div class="lock-date" id="lockDate">星期日，11月1日</div>
+        <div class="lock-time" id="lockTime">21:41</div>
+
+        <div class="lock-message">
+            这是一台遗失的手机。<br>
+            屏幕已锁定，请输入密码。
+        </div>
+
+        <div class="pass-title">输入密码</div>
+
+        <div class="password-dots" id="dots">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+
+        <div class="keypad" id="keypad">
+            <button class="key" data-num="1">1</button>
+            <button class="key" data-num="2">2</button>
+            <button class="key" data-num="3">3</button>
+            <button class="key" data-num="4">4</button>
+            <button class="key" data-num="5">5</button>
+            <button class="key" data-num="6">6</button>
+            <button class="key" data-num="7">7</button>
+            <button class="key" data-num="8">8</button>
+            <button class="key" data-num="9">9</button>
+            <button class="key empty"></button>
+            <button class="key" data-num="0">0</button>
+            <button class="key delete" id="deleteKey">删除</button>
+        </div>
+
+        <div class="error-text" id="errorText"></div>
+
     </div>
-  </div>
+
+    <!-- 桌面 -->
+
+    <div class="home-screen" id="homeScreen">
+
+        <div class="desktop-date" id="desktopDate">星期日，11月1日</div>
+        <div class="desktop-clock" id="desktopClock">21:41</div>
+
+        <div class="app-grid">
+
+            <div class="app" onclick="openApp('messages')">
+                <div class="app-icon messages-icon">💬</div>
+                <div class="app-name">信息</div>
+            </div>
+
+            <div class="app" onclick="openApp('photos')">
+                <div class="app-icon photos-icon">🌈</div>
+                <div class="app-name">照片</div>
+            </div>
+
+            <div class="app" onclick="openApp('notes')">
+                <div class="app-icon notes-icon">📝</div>
+                <div class="app-name">备忘录</div>
+            </div>
+
+            <div class="app" onclick="showToast('设置暂未开放')">
+                <div class="app-icon settings-icon">⚙️</div>
+                <div class="app-name">设置</div>
+            </div>
+
+            <div class="app" onclick="showToast('相机无法启动')">
+                <div class="app-icon camera-icon">📷</div>
+                <div class="app-name">相机</div>
+            </div>
+
+            <div class="app" onclick="showToast('音乐库为空')">
+                <div class="app-icon music-icon">🎵</div>
+                <div class="app-name">音乐</div>
+            </div>
+
+            <div class="app" onclick="showToast('天气数据暂不可用')">
+                <div class="app-icon weather-icon">☀️</div>
+                <div class="app-name">天气</div>
+            </div>
+
+            <div class="app" onclick="showToast('时钟')">
+                <div class="app-icon clock-icon">🕘</div>
+                <div class="app-name">时钟</div>
+            </div>
+
+        </div>
+
+        <div class="dock">
+            <div class="app" onclick="openApp('messages')">
+                <div class="app-icon messages-icon">💬</div>
+            </div>
+            <div class="app" onclick="openApp('photos')">
+                <div class="app-icon photos-icon">🌈</div>
+            </div>
+            <div class="app" onclick="openApp('notes')">
+                <div class="app-icon notes-icon">📝</div>
+            </div>
+            <div class="app" onclick="showToast('电话暂不可用')">
+                <div class="app-icon" style="background:#32c85a">📞</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 信息 App -->
+
+    <div class="app-window messages-app" id="messages">
+
+        <div class="app-header">
+            <button class="back-btn" onclick="closeApp()">‹ 返回</button>
+            <div class="app-title">信息</div>
+            <div style="width:45px"></div>
+        </div>
+
+        <div class="app-content" id="chatContent">
+
+            <div class="chat-person">
+                <div class="avatar">👩🏻</div>
+                林晚
+                <div style="font-size:11px;margin-top:4px;color:#999">
+                    iMessage
+                </div>
+            </div>
+
+            <div class="chat-time">10月28日 20:14</div>
+
+            <div class="bubble-row left">
+                <div class="bubble">最近怎么样？好久没见你了。</div>
+            </div>
+
+            <div class="bubble-row right">
+                <div class="bubble">还好，最近有点忙。</div>
+            </div>
+
+            <div class="bubble-row left">
+                <div class="bubble">对了，你生日快到了吧？</div>
+            </div>
+
+            <div class="bubble-row right">
+                <div class="bubble">对啊，8月24号。</div>
+            </div>
+
+            <div class="bubble-row left">
+                <div class="bubble">哈哈，我记得！今年准备怎么过？</div>
+            </div>
+
+            <div class="bubble-row right">
+                <div class="bubble">还没想好。</div>
+            </div>
+
+            <div class="chat-time">10月29日 23:48</div>
+
+            <div class="bubble-row left">
+                <div class="bubble">你最近是不是遇到什么事情了？</div>
+            </div>
+
+            <div class="bubble-row right">
+                <div class="bubble">没事，不用担心。</div>
+            </div>
+
+            <div class="bubble-row left">
+                <div class="bubble">如果有什么秘密，可以告诉我。</div>
+            </div>
+
+        </div>
+
+        <div class="chat-input-area">
+            <input class="chat-input" id="chatInput"
+            placeholder="iMessage" autocomplete="off">
+            <button class="send-btn" onclick="sendMessage()">发送</button>
+        </div>
+
+    </div>
+
+    <!-- 相册 App -->
+
+    <div class="app-window photos-app" id="photos">
+
+        <div class="app-header">
+            <button class="back-btn" onclick="closeApp()">‹ 返回</button>
+            <div class="app-title">照片</div>
+            <div style="width:45px"></div>
+        </div>
+
+        <div class="app-content photos-content">
+
+            <div class="photos-heading">最近项目</div>
+
+            <div class="photo-grid">
+
+                <div class="photo" onclick="showPhoto(0)">
+                    <div class="photo-art p1">🌅</div>
+                </div>
+
+                <div class="photo" onclick="showPhoto(1)">
+                    <div class="photo-art p2">🌊</div>
+                </div>
+
+                <div class="photo" onclick="showPhoto(2)">
+                    <div class="photo-art p3">🎂</div>
+                </div>
+
+                <div class="photo" onclick="showPhoto(3)">
+                    <div class="photo-art p4">🌲</div>
+                </div>
+
+                <div class="photo" onclick="showPhoto(4)">
+                    <div class="photo-art p5">🌙</div>
+                </div>
+
+                <div class="photo" onclick="showPhoto(5)">
+                    <div class="photo-art p6">💌</div>
+                </div>
+
+            </div>
+
+            <p style="margin-top:20px;color:#999;font-size:12px">
+                6张照片 · 2025年
+            </p>
+
+        </div>
+
+    </div>
+
+    <!-- 照片放大 -->
+
+    <div class="photo-viewer" id="photoViewer">
+
+        <button class="close-photo" onclick="closePhoto()">✕</button>
+
+        <div class="large-photo" id="largePhoto"></div>
+
+        <div class="photo-clue" id="photoClue"></div>
+
+    </div>
+
+    <!-- 备忘录 App -->
+
+    <div class="app-window notes-app" id="notes">
+
+        <div class="app-header">
+            <button class="back-btn" onclick="closeApp()">‹ 返回</button>
+            <div class="app-title">备忘录</div>
+            <div style="width:45px"></div>
+        </div>
+
+        <div class="app-content">
+
+            <div class="notes-date">2025年10月28日 22:36</div>
+
+            <div class="note-title">一些重要的事情</div>
+
+            <div class="note-text">最近总觉得有人在偷偷关注我。
+
+有些事情，我不想让别人知道。
+
+如果有一天你打开了我的手机，希望你能找到真相。
+
+记住：
+
+我的生日就是密码。
+
+不要忘记那个特别的日子。
+
+—— 林晚</div>
+
+        </div>
+
+    </div>
+
+    <!-- 通知 -->
+
+    <div class="toast" id="toast"></div>
+
 </div>
 
 <script>
-  function unlock() {
-    document.getElementById('lock-screen').classList.remove('active');
-    document.getElementById('home-screen').classList.add('active');
-  }
-  function openApp(app) {
-    if (app === 'chat') {
-      document.getElementById('home-screen').classList.remove('active');
-      document.getElementById('chat-screen').classList.add('active');
+
+/* 时间 */
+
+function updateTime() {
+    const now = new Date();
+
+    const time = now.toLocaleTimeString('zh-CN', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    });
+
+    const date = now.toLocaleDateString('zh-CN', {
+        month: 'long',
+        day: 'numeric',
+        weekday: 'long'
+    });
+
+    document.getElementById('lockTime').textContent = time;
+    document.getElementById('statusTime').textContent = time;
+    document.getElementById('desktopClock').textContent = time;
+
+    document.getElementById('lockDate').textContent = date;
+    document.getElementById('desktopDate').textContent = date;
+}
+
+updateTime();
+setInterval(updateTime, 1000);
+
+
+/* 密码系统 */
+
+let password = '';
+
+const correctPassword = '0824';
+
+const dots = document.querySelectorAll('.dot');
+
+function updateDots() {
+    dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index < password.length);
+    });
+}
+
+function inputNumber(num) {
+
+    if (password.length >= 4) return;
+
+    password += num;
+
+    updateDots();
+
+    if (password.length === 4) {
+        setTimeout(checkPassword, 250);
     }
-  }
-  function goHome() {
-    document.getElementById('chat-screen').classList.remove('active');
-    document.getElementById('home-screen').classList.add('active');
-  }
+}
+
+function checkPassword() {
+
+    if (password === correctPassword) {
+
+        document.getElementById('errorText').textContent = '';
+
+        const lock = document.getElementById('lockScreen');
+
+        lock.style.opacity = '0';
+        lock.style.transform = 'scale(1.08)';
+
+        setTimeout(() => {
+            lock.style.display = 'none';
+
+            document.getElementById('homeScreen')
+            .classList.add('show');
+
+        }, 550);
+
+    } else {
+
+        const phone = document.getElementById('phone');
+
+        phone.classList.remove('shake');
+
+        void phone.offsetWidth;
+
+        phone.classList.add('shake');
+
+        document.getElementById('errorText')
+        .textContent = '密码错误，请重试';
+
+        password = '';
+
+        setTimeout(updateDots, 250);
+
+    }
+}
+
+document.querySelectorAll('[data-num]').forEach(btn => {
+
+    btn.addEventListener('click', () => {
+        inputNumber(btn.dataset.num);
+    });
+
+});
+
+document.getElementById('deleteKey').onclick = () => {
+
+    password = password.slice(0, -1);
+
+    document.getElementById('errorText').textContent = '';
+
+    updateDots();
+
+};
+
+
+/* 键盘支持 */
+
+document.addEventListener('keydown', e => {
+
+    if (document.getElementById('lockScreen').style.display !== 'none') {
+
+        if (/^[0-9]$/.test(e.key)) {
+            inputNumber(e.key);
+        }
+
+        if (e.key === 'Backspace') {
+            password = password.slice(0, -1);
+            updateDots();
+        }
+
+    }
+
+});
+
+
+/* App 打开关闭 */
+
+let currentApp = null;
+
+function openApp(name) {
+
+    if (currentApp) return;
+
+    currentApp = name;
+
+    document.getElementById(name).classList.add('open');
+
+}
+
+function closeApp() {
+
+    if (!currentApp) return;
+
+    document.getElementById(currentApp).classList.remove('open');
+
+    currentApp = null;
+
+    closePhoto();
+
+}
+
+
+/* 相册 */
+
+const photoData = [
+
+    {
+        emoji: '🌅',
+        bg: 'linear-gradient(140deg,#f8c6a2,#8d626b)',
+        clue: '那天的日落很美。'
+    },
+
+    {
+        emoji: '🌊',
+        bg: 'linear-gradient(140deg,#344e69,#b4c4d4)',
+        clue: '海边的风很大。'
+    },
+
+    {
+        emoji: '🎂',
+        bg: 'linear-gradient(140deg,#f6d99c,#d08a52)',
+        clue: '生日蛋糕上的数字：24。'
+    },
+
+    {
+        emoji: '🌲',
+        bg: 'linear-gradient(140deg,#7a9a8c,#253c3a)',
+        clue: '我们曾经一起去过这里。'
+    },
+
+    {
+        emoji: '🌙',
+        bg: 'linear-gradient(140deg,#c8b3dc,#6b6689)',
+        clue: '8月的夜晚，月亮特别亮。'
+    },
+
+    {
+        emoji: '💌',
+        bg: 'linear-gradient(140deg,#e9c9c1,#875c6a)',
+        clue: '隐藏线索：0824。记住这个数字。'
+    }
+
+];
+
+function showPhoto(index) {
+
+    const data = photoData[index];
+
+    document.getElementById('largePhoto').style.background =
+    data.bg;
+
+    document.getElementById('largePhoto').textContent =
+    data.emoji;
+
+    document.getElementById('photoClue').textContent =
+    data.clue;
+
+    document.getElementById('photoViewer')
+    .classList.add('show');
+
+}
+
+function closePhoto() {
+
+    document.getElementById('photoViewer')
+    .classList.remove('show');
+
+}
+
+
+/* 信息互动 */
+
+const replies = [
+
+    {
+        keywords: ['你是谁', '是谁'],
+        reply: '我是林晚啊……你怎么突然这么问？'
+    },
+
+    {
+        keywords: ['生日', '几月几号'],
+        reply: '你不是知道吗？8月24号。你以前从来不会忘记的。'
+    },
+
+    {
+        keywords: ['密码', '锁屏'],
+        reply: '你还记得我的生日吗？也许答案一直都在你身边。'
+    },
+
+    {
+        keywords: ['秘密', '真相'],
+        reply: '有些事情我不敢直接告诉你。去看看我的照片吧。'
+    },
+
+    {
+        keywords: ['照片', '相册'],
+        reply: '相册里有一张照片，我一直没有舍得删掉。'
+    },
+
+    {
+        keywords: ['想你', '喜欢'],
+        reply: '……我也一样。'
+    },
+
+    {
+        keywords: ['再见'],
+        reply: '等等，别走。我还有话没说完。'
+    }
+
+];
+
+function appendBubble(text, type) {
+
+    const content = document.getElementById('chatContent');
+
+    const row = document.createElement('div');
+
+    row.className = 'bubble-row ' + type;
+
+    const bubble = document.createElement('div');
+
+    bubble.className = 'bubble';
+
+    bubble.textContent = text;
+
+    row.appendChild(bubble);
+
+    content.appendChild(row);
+
+    content.scrollTop = content.scrollHeight;
+
+}
+
+function sendMessage() {
+
+    const input = document.getElementById('chatInput');
+
+    const text = input.value.trim();
+
+    if (!text) return;
+
+    appendBubble(text, 'right');
+
+    input.value = '';
+
+    const matched = replies.find(item =>
+        item.keywords.some(keyword => text.includes(keyword))
+    );
+
+    setTimeout(() => {
+
+        let response = matched
+        ? matched.reply
+        : '嗯？你想说什么？我在听。';
+
+        appendBubble(response, 'left');
+
+    }, 700);
+
+}
+
+document.getElementById('chatInput').addEventListener('keydown', e => {
+
+    if (e.key === 'Enter') {
+        sendMessage();
+    }
+
+});
+
+
+/* 通知 */
+
+let toastTimer;
+
+function showToast(message) {
+
+    const toast = document.getElementById('toast');
+
+    toast.textContent = message;
+
+    toast.classList.add('show');
+
+    clearTimeout(toastTimer);
+
+    toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+    }, 2200);
+
+}
+
+
+/* 返回键 */
+
+document.addEventListener('keydown', e => {
+
+    if (e.key === 'Escape') {
+
+        if (document.getElementById('photoViewer')
+        .classList.contains('show')) {
+
+            closePhoto();
+
+        } else {
+
+            closeApp();
+
+        }
+
+    }
+
+});
+
 </script>
 
 </body>
